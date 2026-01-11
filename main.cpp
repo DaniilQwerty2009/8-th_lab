@@ -10,6 +10,9 @@
 #include<random>
 #include<algorithm>
 
+#include <chrono>
+typedef std::chrono::high_resolution_clock ourClock;
+
 using std::cout;
 using std::endl;
 
@@ -29,29 +32,39 @@ int main()
     cout << "БИБИЛИОТЕА ШАБЛОННЫХ КЛАССОВ STL" << endl;
     cout << std::setfill('=') <<std::setw(60) << '=' << endl;
 
-    // переменные-счетчики времени
-    time_t start;
-    time_t popTime;
-    time_t pushTime;
-    time_t sortTime;
-    time_t searchTime;
-    time_t finish;
-    time_t resultForList;
-    time_t resultForSet;
-    
-    // размерность контейнеров
-    const size_t containerLen = 10000000;
-    size_t actualLen = containerLen;
+
 
     // Итераторы
     list<int>::iterator listIterator;
     set<int>::iterator  setIterator;
 
-    // генератор случайных чисел
-    std::mt19937 generatorForList(0);
-    std::mt19937 generatorForSet(0);
+    //====== НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ ========== 
+    
+    // размерность контейнеров
+    const size_t containerLen = 100000000;
+    // -------------------------------------------
+    
+    // генератор случайных чисел - нужны для добавления и поиска случайных элементов
+    int seed = 0;   // seed = time(NULL) для разных значений при каждом запуске
+
+    std::mt19937 numGenerator(seed);
     // распределение случайных чисел в нужном диапозоне 
     std::uniform_int_distribution <int> dist(1, containerLen);
+    // -------------------------------------------
+
+    // добавляемый, удаляемый и искомый элементы.
+    // по умолчанию случайные числа в пределах значения containerLen
+    const int pushedElement   = dist(numGenerator);
+    const int popElement      = dist(numGenerator); 
+    const int searchedElement = dist(numGenerator);
+    // -------------------------------------------
+
+    // позиция, на которую будет добавлен элемент в список
+    enum position {front, middle, back};
+    position pushPosition     = middle; // по умолчанию середина
+
+    // ==========================================
+
 
     cout << "Создадим список случайных положительных чисел длинной " << containerLen << " элементов." << endl;
 
@@ -63,7 +76,7 @@ int main()
         buffer.push_back(i);
 
     // перемешиваем массив
-    std::shuffle(buffer.begin(), buffer.end(), generatorForList);
+    std::shuffle(buffer.begin(), buffer.end(), numGenerator);
 
     // Создаем список и заполняем его из массива
     list<int> ourList;
@@ -73,7 +86,7 @@ int main()
 
         
     listIterator = ourList.begin();
-    for(int i = 0; i < 20; ++i, ++listIterator)
+    for(int i = 0; i < 10; ++i, ++listIterator)
     {
         cout << *listIterator << " "; 
     }
@@ -84,82 +97,68 @@ int main()
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Удалим и добавим элементы в начало, середину и конец списка." << endl;
-    cout << "После, отсортируем список и найдем три добавленных элемента" << endl;
+    cout << "Удаление элемента " << popElement << endl;
 
-    cout << std::setfill('-') <<std::setw(60) << '-' << endl;
-
-    cout << "Удаление первого, среднего и последнего элемента..." << endl;
-
-    // 1-го
-    ourList.pop_front(); 
-    actualLen--;
-
-    // среднего
     listIterator = ourList.begin();
-    // перемещаем итератор до середины списка
-    for(int i = 0; i < actualLen/2; ++i)
-        listIterator++;
-    // удаляем с середины
+    
+    while(*listIterator != popElement)
+        ++listIterator;
+
     ourList.erase(listIterator);
-    actualLen--;
-    
-
-    // удаление последнего
-    ourList.pop_back();
-    actualLen--;
 
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Добавление в начало, середину и конец списка..." << endl;
+    cout << "Добавление элемента " << pushedElement;
   
-    // в начало
-    int pushedFront = dist(generatorForList);
-    ourList.push_front(pushedFront);
-    actualLen++;
+    switch (pushPosition)
+    {
+    case(front):
+        cout << " в начало списка" << endl;
+        ourList.push_front(pushedElement);
+        break;
     
+    case(middle):
+        cout << " в середину списка" << endl;    
 
-    // в середину
-    listIterator = ourList.begin();
-    // перемещаем итератор до середины списка
-    for(int i = 0; i < actualLen/2; ++i)
-        listIterator++;
+        listIterator = ourList.begin();
+        for(size_t i = 0; i < ourList.size()/2; ++i)
+            listIterator++;
 
-    int pushedMidle = dist(generatorForList);
-    ourList.insert(listIterator, pushedMidle);
-    actualLen++;
-    
-    // в конец
-    int pushedBack = dist(generatorForList);
-    ourList.push_back(pushedBack);
-    
+        ourList.insert(listIterator, pushedElement);
+        break;
+
+    case(back):
+        cout << " в конец списка" << endl;    
+        ourList.push_back(pushedElement);
+        break;
+
+    }
+
+
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
     cout << "Сортировка списка..." << endl;
     ourList.sort();
 
-    listIterator = ourList.begin();
-    for(int i = 0; i < 10; ++i, ++listIterator)
-    {
-        cout << *listIterator << " "; 
-    }
-    cout << "..." << endl;
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Найдем случайный элемент списка." << endl;
+    cout << "Поиск элемента" << endl;
 
-    int searchedElem = dist(generatorForList);
-    cout << "Искомый элемент: " << searchedElem << endl;
+    cout << "Искомый элемент: " << searchedElement << endl;
 
     listIterator = ourList.begin();
 
-    for(;listIterator != ourList.end(); ++ listIterator)
+    while(listIterator != ourList.end())
     {
-        if(*listIterator == searchedElem)
-            cout << "Элемент найден." << endl;
+        if(*listIterator == searchedElement)
+        {
+            cout << "Элемент найден" << endl;
+        }
+
+        ++listIterator;
     }
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
@@ -176,9 +175,8 @@ int main()
 
 
 
-    cout << "Создадим множество случайных положительных чисел длинной " << containerLen << " элементов." << endl;
+    cout << "Создадим множество случайных  чисел длинной " << containerLen << " элементов." << endl;
 
-    actualLen = containerLen;
     std::set<int> ourSet;
 
     setIterator = ourSet.begin();
@@ -187,8 +185,8 @@ int main()
         setIterator = ourSet.insert(setIterator, i);
     }
 
-        
-    for(int i = 0; i < 20; ++i)
+    setIterator = ourSet.begin();  
+    for(int i = 0; i < 10; ++i, ++setIterator)
     {
         cout << *setIterator << " "; 
     }
@@ -199,86 +197,34 @@ int main()
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Удалим и добавим элементы в начало, середину и конец множества." << endl;
-    cout << "После найдем три добавленных элемента (сортировать множество не будем - оно остортированно по умолчанию)" << endl;
+    cout << "Удаление элемента " << popElement << endl;
 
-    cout << std::setfill('-') <<std::setw(60) << '-' << endl;
-
-    cout << "Удаление первого, среднего и последнего элемента..." << endl;
-
-    // 1-го
-    ourSet.erase(ourSet.begin()); 
-    containerLen--;
-
-    // среднего
-    ourSet.erase(containerLen/2);
-    containerLen--;
-    
-
-    // удаление последнего
-    ourSet
-    containerLen--;
+    ourSet.erase(popElement);
 
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Добавление в начало, середину и конец списка..." << endl;
+    cout << "Добавление элемента " << pushedElement << endl;
   
-    // в начало
-    int pushedFront = dist(generatorForList);
-    ourList.push_front(pushedFront);
-    containerLen++;
-    
-
-    // в середину
-    listIterator = ourList.begin();
-    // перемещаем итератор до середины списка
-    for(int i = 1; i <= containerLen/2; ++i)
-        listIterator++;
-
-    int pushedMidle = dist(generatorForList);
-    ourList.insert(listIterator, pushedMidle);
-    containerLen++;
-    
-    // в конец
-    int pushedBack = dist(generatorForList);
-    ourList.push_back(pushedBack);
+    ourSet.insert(pushedElement);   
     
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Сортировка списка..." << endl;
-    ourList.sort();
+   
+    cout << "Поиск элемента" << endl;
 
-    listIterator = ourList.begin();
-    for(int i = 0; i < 10; ++i, ++listIterator)
-    {
-        cout << *listIterator << " "; 
-    }
-    cout << "..." << endl;
+    cout << "Искомый элемент: " << searchedElement << endl;
 
-
-    cout << std::setfill('-') <<std::setw(60) << '-' << endl;
-
-    cout << "Найдем случайный элемент списка." << endl;
-
-    int searchedElem = dist(generatorForList);
-    cout << "Искомый элемент: " << searchedElem << endl;
-
-    listIterator = ourList.begin();
-
-    for(;listIterator != ourList.end(); ++ listIterator)
-    {
-        if(*listIterator == searchedElem)
-            cout << "Элемент найден." << endl;
-    }
+    if(ourSet.find(searchedElement) != ourSet.end())
+        cout << "Элемент найден" << endl;
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
     finish = time(NULL);
-    resultForList = finish - start;
+    resultForSet = finish - start;
     
-    cout << "Время выполнения операций для списка: " << resultForList << " секунд" << endl;
+    cout << "Время выполнения операций для списка: " << resultForSet << " секунд" << endl;
 
     
     
