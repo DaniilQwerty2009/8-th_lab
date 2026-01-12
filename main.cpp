@@ -33,7 +33,6 @@ int main()
     cout << std::setfill('=') <<std::setw(60) << '=' << endl;
 
 
-
     // Итераторы
     list<int>::iterator listIterator;
     set<int>::iterator  setIterator;
@@ -41,13 +40,18 @@ int main()
     //====== НАСТРАИВАЕМЫЕ ПАРАМЕТРЫ ========== 
     
     // размерность контейнеров
-    const size_t containerLen = 100000000;
+    const size_t containerLen = 1000000;  
     // -------------------------------------------
     
+    // точность измерения (кол-во цифр после запятой)
+
+    short precision = 5;
+
     // генератор случайных чисел - нужны для добавления и поиска случайных элементов
-    int seed = 0;   // seed = time(NULL) для разных значений при каждом запуске
+    int seed = time(NULL);   // seed = time(NULL) для разных значений при каждом запуске
 
     std::mt19937 numGenerator(seed);
+    
     // распределение случайных чисел в нужном диапозоне 
     std::uniform_int_distribution <int> dist(1, containerLen);
     // -------------------------------------------
@@ -93,7 +97,7 @@ int main()
     cout << "..." << endl;
     
     // Засекаем время начала работы алгоритма
-    start = time(NULL);
+    auto start = ourClock::now();
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
@@ -142,10 +146,16 @@ int main()
     cout << "Сортировка списка..." << endl;
     ourList.sort();
 
+    listIterator = ourList.begin();
+    for(int i = 0; i < 10; ++i, ++listIterator)
+    {
+        cout << *listIterator << " "; 
+    }
+    cout << "..." << endl;
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    cout << "Поиск элемента" << endl;
+    cout << "Поиск элемента..." << endl;
 
     cout << "Искомый элемент: " << searchedElement << endl;
 
@@ -163,19 +173,19 @@ int main()
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    finish = time(NULL);
-    resultForList = finish - start;
+    auto finish = ourClock::now();
+    auto duration = std::chrono::duration<double>(finish - start).count();
     
-    cout << "Время выполнения операций для списка: " << resultForList << " секунд" << endl;
+    cout << "Время выполнения операций для списка: " << std::fixed << std::setprecision(precision) << duration << " секунд" << endl;
 
 
 
     cout << std::setfill('=') <<std::setw(60) << '=' << endl;
 
 
+    // ============================================================================================
 
-
-    cout << "Создадим множество случайных  чисел длинной " << containerLen << " элементов." << endl;
+    cout << "Создадим множество натуральных чисел длинной " << containerLen << " элементов." << endl;
 
     std::set<int> ourSet;
 
@@ -193,7 +203,7 @@ int main()
     cout << "..." << endl;
     
     // Засекаем время начала работы алгоритма
-    start = time(NULL);
+    start = ourClock::now();
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
@@ -221,12 +231,12 @@ int main()
 
     cout << std::setfill('-') <<std::setw(60) << '-' << endl;
 
-    finish = time(NULL);
-    resultForSet = finish - start;
+    finish = ourClock::now();
+    duration = std::chrono::duration<double>(finish - start).count();
     
-    cout << "Время выполнения операций для списка: " << resultForSet << " секунд" << endl;
+    cout << "Время выполнения операций для множества: " << std::fixed << std::setprecision(precision) << duration << " секунд" << endl;
 
-    
+    cout << std::setfill('=') <<std::setw(60) << '=' << endl;
     
     return 0;
 }
