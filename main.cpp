@@ -19,8 +19,6 @@ using std::endl;
 using std::list;
 using std::set;
 
-// почему контейнер, decltype
-// добавление, удаление, поиск, сортировка
 
 int main()
 {
